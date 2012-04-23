@@ -1,5 +1,4 @@
 require "qu"
-#require "delayed_job/worker"
 require "leveldb"
 require "multi_json"
 
