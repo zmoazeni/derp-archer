@@ -3,6 +3,7 @@ require "leveldb"
 require "multi_json"
 
 require "delayed_job/backend"
+require "delayed_job/manager"
 require "delayed_job/worker"
 
 module DelayedJob
