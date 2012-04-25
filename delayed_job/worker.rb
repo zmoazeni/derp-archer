@@ -2,10 +2,9 @@ require "thread"
 
 module DelayedJob
   class Worker < Qu::Worker
-    def initialize(*)
-      # should warn the user there is only 1 queue
-      super
-      @manager = Manager.new(5)
+    def initialize(max_children = 3)
+      super([])
+      @manager = Manager.new(max_children)
     end
     
     def work
@@ -18,7 +17,6 @@ module DelayedJob
             logger.debug "Worker #{id}:#{Process.pid} reserved job #{job}"
             job.perform
             logger.debug "Worker #{id}:#{Process.pid} completed job #{job}"
-            exit!
           end
           
           @manager << child_pid

@@ -17,7 +17,7 @@ Qu.configure do |c|
   c.logger.level = Logger::DEBUG
 end
 
-worker = DelayedJob::Worker.new
+worker = DelayedJob::Worker.new(5)
 
 10.times do |i|
   DelayedJob.enqueue(MyJob, i)
