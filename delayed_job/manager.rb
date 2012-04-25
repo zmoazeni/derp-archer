@@ -17,12 +17,5 @@ module DelayedJob
     def delete(pid)
       @lock.synchronize { @children.delete(pid) }
     end
-
-    # def wait
-    #   Thread.new do
-    #     Process.wait(child)
-    #     @lock.synchronize { @children.delete(child) }
-    #   end
-    # end
   end
 end
