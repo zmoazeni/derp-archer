@@ -13,19 +13,19 @@ module DelayedJob
         logger.debug "Worker #{id} waiting for next job"
         job = Qu.reserve(self)
         if job
-          if child_pid = fork
-            @manager << child_pid
-            Thread.new do
-              Process.wait(child_pid)
-              @manager.delete(child_pid)
-              Qu.backend.completed(job)
-            end
-          else
+          child_pid = fork do
             srand
             logger.debug "Worker #{id}:#{Process.pid} reserved job #{job}"
             job.perform
             logger.debug "Worker #{id}:#{Process.pid} completed job #{job}"
             exit!
+          end
+          
+          @manager << child_pid
+          Thread.new do
+            Process.wait(child_pid)
+            @manager.delete(child_pid)
+            Qu.backend.completed(job)
           end
         end
       end
