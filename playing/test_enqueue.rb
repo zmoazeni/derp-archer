@@ -11,8 +11,8 @@ class MyJob
   end
 end
 
-Qu.configure do |c|
-  c.backend = DelayedJob::Backend.new
+DelayedJob.configure do |c|
+#  c.backend = DelayedJob::Backend.new
   c.connection = "./db"
   c.logger.level = Logger::DEBUG
 end

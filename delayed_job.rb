@@ -13,4 +13,9 @@ module DelayedJob
   def self.enqueue(*args)
     Qu.enqueue(*args)
   end
+
+  def self.configure(*args, &block)
+    Qu.backend = DelayedJob::Backend.new
+    Qu.configure(*args, &block)
+  end
 end
