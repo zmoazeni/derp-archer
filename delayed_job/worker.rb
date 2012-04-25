@@ -2,8 +2,9 @@ require "thread"
 
 module DelayedJob
   class Worker < Qu::Worker
-    def initialize(max_children = 3)
+    def initialize(max_children=3, port=3000)
       super([])
+      @port = port
       @manager = Manager.new(max_children)
     end
     
@@ -32,13 +33,22 @@ module DelayedJob
     def start
       logger.warn "Worker #{id} starting"
       handle_signals
-    
+      start_server
       loop { work; sleep 1 }
     rescue Abort => e
       # Ok, we'll shut down, but give us a sec
     ensure
       Qu.backend.unregister_worker(self)
       logger.debug "Worker #{id} done"
+    end
+
+    private
+    def start_server
+      Thread.new do
+        Thin::Server.start('0.0.0.0', @port, {signals:false}) do
+          run Server.new
+        end
+      end
     end
   end
 end
