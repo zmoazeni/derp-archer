@@ -38,7 +38,7 @@ The architecture is laid out like this:
       - Forking 1 process per job (a la resque) is inefficient however
         it's efficient enough for DJ
       - Forking per job also avoids memory leaks that may arise from
-        the app. The child will take any memory hits and then dies at
+        the app. The child will take any memory hits and then dies/releases memory at
         the end of the job.
       - (Potential feature: adding a sinatra/server route that lets
         you change the maximum number of children at runtime)
