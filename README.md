@@ -53,8 +53,8 @@ The architecture is laid out like this:
   - Benefits of depending on LevelDB
     - No longer depend on MySQL or Mongo for managing the queue (I
        should benchmark leveldb, but my intuition is that it's much faster)
-    - It separates and simplifies our storage We no longer need to
-      provide a mysql migration or maintaining our
+    - It separates and simplifies our storage. We no longer need to
+      provide a mysql migration or maintain our
       connection with ActiveRecord or MongoMapper
   - Using Qu and LevelDB, people can use DelayedJob on non-Rails
      projects
