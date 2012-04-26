@@ -56,13 +56,11 @@ The architecture is laid out like this:
     - It separates and simplifies our storage. We no longer need to
       provide a mysql migration or maintain our
       connection with ActiveRecord or MongoMapper
-  - Using Qu and LevelDB, people can use DelayedJob on non-Rails
-     projects
+  - Qu and LevelDB lets people can use DelayedJob on non-Rails projects
   - Downsides: 
-    - the current front-end for delaying jobs is slick
-    - We can't split workers among boxes. This may become a line in the
-     sand to prompt people to upgrade to a different background
-     processor
+    - The current front-end for delaying jobs is slick
+    - We can't split workers among multiple machines (though the worker can be started elsewhere). This may become a line in the
+     sand to prompt people to upgrade to a different background processor
 
 # What is with the repo name?
 
