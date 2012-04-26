@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Derp-archer by zmoazeni</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Derp-archer</h1>
+        <p>Playing around with bg processing</p>
+        <p class="view"><a href="https://github.com/zmoazeni/derp-archer">View the Project on GitHub <small>zmoazeni/derp-archer</small></a></p>
+        <ul>
+          <li><a href="https://github.com/zmoazeni/derp-archer/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zmoazeni/derp-archer/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zmoazeni/derp-archer">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>A basic prototype of a rewrite of DelayedJob that includes these concepts:</h1>
+
+<p>Basically it keeps the same essence of what I think makes DJ great: "small and simple to get started and run". It also rips out a large swath of dependencies that makes maintenance tougher. It retains a Resque-like API to let the codebase upgrade to another Qu backend/Resque/Sidekiq when their app needs more power.</p>
+
+<ul>
+<li>Ripping out AR/Mongo/etc and using <a href="http://code.google.com/p/leveldb/">leveldb</a> as the sole backend</li>
+<li>Reusing <a href="https://github.com/bkeepers/qu">Qu's</a> existing architecture
+(though I'm already starting to depart from his initial design)</li>
+<li>1 fork per job with a maximum number of workers (inefficient, but
+hey upgrade to something else if you need more) - won't allow
+spreading workers among machines.</li>
+<li>Using sinatra/thin to enqueue jobs</li>
+</ul><h1>To Run with a sample worker</h1>
+
+<pre><code>bundle
+bundle exec ruby -I. ./playing/test_worker.rb
+</code></pre>
+
+<h1>How it works</h1>
+
+<p>The architecture is laid out like this:</p>
+
+<ul>
+<li>Only one process is started by the user.
+
+<ul>
+<li>From Qu's perspective, this is 1 "worker" (see below)</li>
+</ul>
+</li>
+<li>The library wraps Qu overriding a Qu::Worker, and the user uses
+DelayedJob.configure</li>
+<li>The library implements a Qu backend that acts as backend interface
+to 3 separate leveldb databases (queued, running, failed)
+
+<ul>
+<li>These are lightweight dbs that are treated more like
+collections.</li>
+<li>If you haven't used leveldb before, it's essentially a
+persistent hash with sorted keys</li>
+<li>Only one process can open a leveldb database at once, which is
+influencing some of software design</li>
+</ul>
+</li>
+<li>The library mostly follow's Qu's conventions however the worker
+isn't actually doing the work. The worker will fork a process per
+job (with a maximum number of children).
+
+<ul>
+<li>The maximum children lets us keep the memory footprint bounded</li>
+<li>Forking 1 process per job (a la resque) is inefficient however
+it's efficient enough for DJ</li>
+<li>Forking per job also avoids memory leaks that may arise from
+the app. The child will take any memory hits and then dies/releases memory at
+the end of the job.</li>
+<li>(Potential feature: adding a sinatra/server route that lets
+you change the maximum number of children at runtime)</li>
+</ul>
+</li>
+<li>The worker will also start a sinatra app using thin. This is actually how jobs are enqueued
+
+<ul>
+<li>This could be a fully fledged JSON API which allows a user to inspect the queue, running jobs, failed jobs, etc.</li>
+</ul>
+</li>
+<li>Benefits of depending on Qu:
+
+<ul>
+<li>Simple codebase. We don't need to maintain a full front-end</li>
+<li>Qu/Resque/Sidekiq use a very similiar API. So someone starting
+with DelayedJob wouldn't have to change much to swap out a
+different architecture</li>
+<li>We can reuse Qu plugins such as Error handlers</li>
+</ul>
+</li>
+<li>Benefits of depending on LevelDB
+
+<ul>
+<li>No longer depend on MySQL or Mongo for managing the queue (I
+should benchmark leveldb, but my intuition is that it's much faster)</li>
+<li>It separates and simplifies our storage. We no longer need to
+provide a mysql migration or maintain our
+connection with ActiveRecord or MongoMapper</li>
+</ul>
+</li>
+<li>Qu and LevelDB lets people can use DelayedJob on non-Rails projects</li>
+<li>Downsides: 
+
+<ul>
+<li>The current front-end for delaying jobs is slick</li>
+<li>We can't split workers among multiple machines (though the worker can be started elsewhere). This may become a line in the
+sand to prompt people to upgrade to a different background processor</li>
+</ul>
+</li>
+</ul><h1>What is with the repo name?</h1>
+
+<p>I just chose a name that github provided :)</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/zmoazeni">zmoazeni</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
